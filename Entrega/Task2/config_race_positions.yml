@@ -33,12 +33,12 @@ datasources:
       field: statusId
 
 database:
-  sqlScript: '../f1_qualifying.sql'
+  sqlScript: '../f1_race_results.sql'
   user: root
   password: admin
   host: localhost
   port: 3306
-  name: f1_qualifying
+  name: f1_race_results
 
 tables:
   dim_driver:
