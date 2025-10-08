@@ -16,7 +16,7 @@ datasources:
       field: IATA_AIRLINE
 
 database:
-  sqlScript: '../dataFlightsLab.sql'
+  sqlScript: './dataFlightsLab.sql'
   user: root
   password: admin
   host: localhost
