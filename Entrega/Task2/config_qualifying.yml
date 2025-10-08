@@ -1,19 +1,19 @@
 datasources: 
   qualifying: 
-    name: "./datasets/qualifying.csv"
+    name: "../DATASETS/qualifying.csv"
     base: true
   races: 
-    name: "./datasets/races.csv"
+    name: "../DATASETS/races.csv"
     mergeLogic:
       base: raceId
       field: raceId
   drivers:
-    name: "./datasets/drivers.csv"
+    name: "../DATASETS/drivers.csv"
     mergeLogic:
       base: driverId
       field: driverId
   circuits:
-    name: "./datasets/circuits.csv"
+    name: "../DATASETS/circuits.csv"
     mergeLogic:
       base: circuitId
       field: circuitId
@@ -23,7 +23,7 @@ datasources:
       lng: longitude
 
 database:
-  sqlScript: '../f1_qualifying.sql'
+  sqlScript: './f1_qualifying.sql'
   user: root
   password: admin
   host: localhost
