@@ -1,6 +1,3 @@
-CREATE SCHEMA IF NOT EXISTS f1_dw;
-USE f1_dw;
-
 CREATE TABLE IF NOT EXISTS dim_driver (
   driver_id INT AUTO_INCREMENT PRIMARY KEY,
   driver_nk INT NOT NULL,                       -- drivers.driverId

@@ -36,7 +36,7 @@ def mergeCSV(file1, file2, chunksize, mergeLogic, rename={}, resultSuffix='gener
             file1DF,
             left_on=left_col,
             right_on=right_col,
-            how="inner",
+            how="left",
             suffixes=("_old", None)
         )
 
@@ -44,7 +44,7 @@ def mergeCSV(file1, file2, chunksize, mergeLogic, rename={}, resultSuffix='gener
         header = i == 0
         merged.to_csv(output_file, mode=mode, header=header, index=False)
 
-    os.remove(file2)
+    """os.remove(file2)"""
     print(f"[INFO] Merge completed. Saved file in {output_file}")
 
     return output_file
