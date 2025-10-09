@@ -1,34 +1,31 @@
-CREATE SCHEMA IF NOT EXISTS f1_dw;
-USE f1_dw;
-
 CREATE TABLE IF NOT EXISTS dim_driver (
   driver_id INT AUTO_INCREMENT PRIMARY KEY,
   driver_nk INT NOT NULL,              -- drivers.driverId in csv
-  driverRef VARCHAR(64) NOT NULL,
+  driver_ref VARCHAR(64) NOT NULL,
   code VARCHAR(16),
   forename VARCHAR(100),
   surname VARCHAR(100),
   nationality VARCHAR(100),
   number INT,
   UNIQUE KEY uq_driver_nk (driver_nk),
-  UNIQUE KEY uq_driverRef (driverRef)
+  UNIQUE KEY uq_driver_ref (driver_ref)
 );
 
 CREATE TABLE IF NOT EXISTS dim_constructor (
   constructor_id INT AUTO_INCREMENT PRIMARY KEY,
   constructor_nk INT NOT NULL,           -- constructors.constructorId in csv
-  constructorRef VARCHAR(64) NOT NULL,
+  constructor_ref VARCHAR(64) NOT NULL,
   name VARCHAR(200),
   country VARCHAR(100),
   url VARCHAR(255),
   UNIQUE KEY uq_constructor_nk (constructor_nk),
-  UNIQUE KEY uq_constructorRef (constructorRef)
+  UNIQUE KEY uq_constructor_ref (constructor_ref)
 );
 
 CREATE TABLE IF NOT EXISTS dim_circuit (
   circuit_id INT AUTO_INCREMENT PRIMARY KEY,
   circuit_nk INT NOT NULL,            -- circuits.circuitId in csv
-  circuitRef VARCHAR(64) NOT NULL,
+  circuit_ref VARCHAR(64) NOT NULL,
   name VARCHAR(200),
   location VARCHAR(200),
   country VARCHAR(100),
@@ -36,7 +33,7 @@ CREATE TABLE IF NOT EXISTS dim_circuit (
   lat DECIMAL(9,6),
   lng DECIMAL(9,6),
   UNIQUE KEY uq_circuit_nk (circuit_nk),
-  UNIQUE KEY uq_circuitRef (circuitRef)
+  UNIQUE KEY uq_circuit_ref (circuit_ref)
 );
 
 CREATE TABLE IF NOT EXISTS dim_date (
@@ -45,7 +42,6 @@ CREATE TABLE IF NOT EXISTS dim_date (
   year SMALLINT,
   month TINYINT,
   day TINYINT,
-  day_of_week TINYINT,
   UNIQUE KEY uq_date (date)
 ) engine=InnoDB;
 
