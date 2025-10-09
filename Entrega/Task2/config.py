@@ -27,7 +27,7 @@ class Config:
             mapping[table] = table_map
 
         return mapping
-    
+
     def load_config(self, config):
         onDupAux = {}
         onNullAux = {} 
@@ -37,10 +37,14 @@ class Config:
         for table, configWrap in config.items():
             for configAux, param in configWrap.items():
                 if(configAux == "onDuplicate"):
-                    if len(param) > 1:
-                        onNullAux[table] = {param["method"]: param["field"]}
+                    if isinstance(param, dict):
+                        method = param.get("method")
+                        if method == "add" and "field" in param:
+                            onDupAux[table] = {"add": param["field"]}
+                        else:
+                            onDupAux[table] = method
                     else:
-                        onNullAux[table] = param["method"]
+                        onDupAux[table] = param
                 elif(configAux == "onNull"):
                     if len(param) > 1:
                         onNullAux[table] = {param["method"]: param["criteria"]}
