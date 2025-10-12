@@ -16,20 +16,20 @@ class Config:
             table_map = {}
             for col_name, rules in cols.items():
                 if isinstance(rules, dict):
-                    if list(rules.keys()) == ["value"]:
-                        table_map[col_name] = rules["value"]
-                    if list(rules.keys()) == ["mapped"]:
-                        table_map[col_name] = rules["mapped"]
+                    if list(rules.keys()) == ['value']:
+                        table_map[col_name] = rules['value']
+                    elif list(rules.keys()) == ['mapped']:
+                        table_map[col_name] = rules['mapped']
                     else:
                         table_map[col_name] = rules
                 else:
                     table_map[col_name] = rules
             mapping[table] = table_map
-
         return mapping
-    
+
     def load_config(self, config):
-        onDupAux = {}
+        onDupRuleAux = {}
+        onDupBaseAux = {}
         onNullAux = {} 
         designAux = {}
         idAux = {}
@@ -37,10 +37,16 @@ class Config:
         for table, configWrap in config.items():
             for configAux, param in configWrap.items():
                 if(configAux == "onDuplicate"):
-                    if len(param) > 1:
-                        onNullAux[table] = {param["method"]: param["field"]}
+                    if isinstance(param, dict):
+                        criteria = param.get("criteria")
+                        onDupBaseAux[table] = criteria
+                        method = param.get("method")
+                        if method == "add" and "field" in param:
+                            onDupRuleAux[table] = {"add": param["field"]}
+                        else:
+                            onDupRuleAux[table] = method
                     else:
-                        onNullAux[table] = param["method"]
+                        onDupRuleAux[table] = param
                 elif(configAux == "onNull"):
                     if len(param) > 1:
                         onNullAux[table] = {param["method"]: param["criteria"]}
@@ -52,13 +58,20 @@ class Config:
                     idAux[table] = param
                 else:
                     raise ValueError(f"Unrecognized config for table {table} found in config file: {param}")
-        return onDupAux, onNullAux, designAux, idAux
+        return onDupBaseAux, onDupRuleAux, onNullAux, designAux, idAux
 
     def db_Skeleton(self):
         result = {}
         for table, columns in self.tables.items():
             attributes = list(columns.keys())
             result[table] = attributes
+            
+        for table, id_col in self.idMapping.items():
+            if table not in result:
+                result[table] = []
+            if id_col not in result[table]:
+                result[table].insert(0, id_col)
+
         return result
 
     def _load(self):
@@ -76,7 +89,7 @@ class Config:
         self.db_name = db_cfg.get("name", "")
         self.tables = cfg.get("tables", {})
         self.tables = self.load_mapping()
-        self.onDuplicate, self.onNull, self.design, self.idMapping = self.load_config(cfg.get("config", {}))
+        self.onDuplicateBase, self.onDuplicateRule, self.onNull, self.design, self.idMapping = self.load_config(cfg.get("config", {}))
 
     def get_dbConnection(self):
         return f"mysql+pymysql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
