@@ -13,7 +13,6 @@ def resolveETL():
     print("[MAIN] Loading Fact data on database")
     db.insertData(data)
     print("[MAIN] ETL Resolved")
-    
 
 def main():
     resolveETL()
