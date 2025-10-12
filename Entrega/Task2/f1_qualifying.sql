@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS dim_race (
   race_id INT AUTO_INCREMENT PRIMARY KEY,
   race_nk INT NOT NULL,               -- races.raceId in csv
   name VARCHAR(200),
-  round INT,
-  year VARCHAR(4),
+  round INT,                 
+  year SMALLINT,
   url VARCHAR(255),
   UNIQUE KEY uq_race_nk (race_nk)
 ) engine=InnoDB;

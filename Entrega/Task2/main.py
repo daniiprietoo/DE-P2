@@ -6,13 +6,15 @@ def resolveETL():
     print("[MAIN] Resolving ETL")
     db.createDB()
     cfg.datasources = [dp.processDatasources(1000000)]
-    data = dp.mapData("dimension")
+    data = dp.mapData("dimension", 1000)
     print("[MAIN] Loading Dimensions data on database")
     db.insertData(data)
-    data = dp.mapData("fact")
+    data = dp.mapData("fact", 1000)
     print("[MAIN] Loading Fact data on database")
     db.insertData(data)
     print("[MAIN] ETL Resolved")
+    
+
 def main():
     resolveETL()
 
