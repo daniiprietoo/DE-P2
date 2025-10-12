@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS dim_date (
   year SMALLINT,
   month TINYINT,
   day TINYINT,
+
   UNIQUE KEY uq_date (date)
 ) engine=InnoDB;
 
