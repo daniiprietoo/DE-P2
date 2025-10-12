@@ -31,6 +31,142 @@ def mapFact(csv, sheet, dimensions):
             records[atribute_sheet] = extractFromDimension(fila_csv, atribute_sheet, dimensions)
     return records                
 """
+""" 
+    if procedure == "dimension":
+        result = dataStructure(procedure)
+        print("[INFO] Initializing data processing for dimensions")
+        for f in cfg.datasources:
+            total_rows = 0
+            for i, chunk in enumerate(
+                pd.read_csv(f, chunksize=chunksize, low_memory=False), start=1
+            ):
+                result = mapRecords(chunk, result)
+                total_rows += len(chunk)
+                print(
+                    f"[INFO] File: {f} | Chunk {i} processed | Rows so far: {total_rows}"
+                )
+        print("[INFO] Dimensions processing concluded")
+    elif procedure == "fact":
+        result = dataStructure(procedure)
+        dimensions = extractFKDimensions()
+        print("[INFO] Initializing data processing for facts")
+        for f in cfg.datasources:
+            total_rows = 0
+            for i, chunk in enumerate(
+                pd.read_csv(f, chunksize=chunksize, low_memory=False), start=1
+            ):
+                result = mapRecords(chunk, result, dimensions)
+                total_rows += len(chunk)
+                print(
+                    f"[INFO] File: {f} | Chunk {i} processed | Rows so far: {total_rows}"
+                )
+        print("[INFO] Facts processing concluded")
+    return cleanData(result)
+    """
+
+def mapDimensions(df, result):
+    for table, table_cfg in cfg.tables.items():
+        if table not in result:
+            continue
+
+        records = generateRecords(df, table_cfg)
+        if not records.empty:
+            result[table].extend(records.to_dict(orient="records"))
+    return result
+
+def mapFact(df, table_name, dimensions, result):
+    print(result.keys())
+    sheet = cfg.tables[table_name]
+    records = generateRecords(df, sheet, dimensions=dimensions)
+    result[table_name].extend(records.to_dict(orient="records"))
+    return result
+
+def generateRecordsN(df, table_cfg):
+    records = pd.DataFrame()
+    for col_name, rules in table_cfg.items():
+        temp = tfm.applyTransform(rules, df, col_name)
+        if temp is not None:
+            records[col_name] = temp
+        else:
+            print(f"[ERROR] Failed to process {col_name}")
+            continue
+    return records
+
+def mapFactN(csv, table_name, dimensions, result):
+
+    df = pd.DataFrame(csv)
+    sheet = cfg.tables[table_name]
+    records = pd.DataFrame(index=df.index)
+    for attr_name, rules in sheet.items():
+        if isinstance(rules, dict) and "value" in rules or isinstance(rules, str):
+            mapping = rules["value"] if isinstance(rules, dict) else rules
+            records[attr_name] = tfm.applyTransform(rules, df, mapping)
+
+        elif isinstance(rules, dict) and "fk" in rules:
+            records[attr_name] = extractFromDimension(df, rules, dimensions, cfg)
+        
+        else:
+            records[attr_name] = None
+    result[table_name].extend(records.to_dict(orient="records"))
+    return result
+
+
+def applyTransformN(rules, dataframe, col):
+    if isinstance(rules, dict):
+        mapping = rules.get("value", "")
+        is_date = rules.get("date", False)
+        is_day = rules.get("day", False)
+        is_hour = rules.get("hour", False)
+        is_second = rules.get("duration_sec", False)
+    else:
+        mapping = rules
+        is_date = False
+        is_day = False
+        is_hour = False
+        is_second = False
+
+    def sanitize(value):
+        if isinstance(value, pd.Series):
+            return value.replace({"\\N": None, "": None, "None": None})
+        if isinstance(value, str) and value.strip() in ("", "\\N", "None"):
+            return None
+        try:
+            return None if pd.isna(value) else value
+        except TypeError:
+            return value
+    if not mapping:
+        return None
+    if mapping in dataframe.keys():
+        if is_date:
+            return sanitize(splitDate(dataframe.get(mapping), col))
+        elif is_day:
+            result = getDayOfWeek(dataframe.get(mapping))
+            return sanitize(result)
+        elif is_hour:
+            result = parse_hour(dataframe.get(mapping))
+            return sanitize(result)
+        elif is_second:
+            result = parse_duration(dataframe.get(mapping))
+            return sanitize(result)
+        else:
+            return sanitize(dataframe.get(mapping))
+
+    elif col in dataframe.keys():
+        if is_date:
+            return sanitize(splitDate(dataframe.get(col), col))
+        elif is_day:
+            result = getDayOfWeek(dataframe.get(col))
+            return sanitize(result)
+        elif is_hour:
+            result = parse_hour(dataframe.get(col))
+            return sanitize(result)
+        elif is_second:
+            result = parse_duration(dataframe.get(col))
+            return sanitize(result)
+        else:
+            return sanitize(dataframe.get(col))
+    else:
+        raise Exception(f"Columns {col} nor {mapping} founded on {dataframe.keys()}")
 
 def mapFactN(df, result, dimension):
     for table, table_cfg in cfg.tables.items():
