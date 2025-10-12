@@ -116,9 +116,6 @@ tables:
     year: { value: date, date: true }
     url:
       value: urlRaces
-    year: 
-      value: yearRaces
-    url: urlRaces
 
   fact_qualifying:
     race_id: { fk: dim_race }
