@@ -1,26 +1,27 @@
 CREATE TABLE IF NOT EXISTS dim_driver (
   driver_id INT AUTO_INCREMENT PRIMARY KEY,
-  driver_nk INT NOT NULL,              -- drivers.driverId in csv
-  driver_ref VARCHAR(64) NOT NULL,
+  driver_nk INT NOT NULL,             -- drivers.driverId in csv
+  driver_ref VARCHAR(64) NOT NULL,     
   code VARCHAR(16),
   forename VARCHAR(100),
   surname VARCHAR(100),
   nationality VARCHAR(100),
   number INT,
+  url VARCHAR(255),
   UNIQUE KEY uq_driver_nk (driver_nk),
   UNIQUE KEY uq_driver_ref (driver_ref)
-);
+) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS dim_constructor (
   constructor_id INT AUTO_INCREMENT PRIMARY KEY,
-  constructor_nk INT NOT NULL,           -- constructors.constructorId in csv
+  constructor_nk INT NOT NULL,        -- constructors.constructorId in csv
   constructor_ref VARCHAR(64) NOT NULL,
   name VARCHAR(200),
-  country VARCHAR(100),
+  nationality VARCHAR(100),
   url VARCHAR(255),
   UNIQUE KEY uq_constructor_nk (constructor_nk),
   UNIQUE KEY uq_constructor_ref (constructor_ref)
-);
+) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS dim_circuit (
   circuit_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -30,26 +31,30 @@ CREATE TABLE IF NOT EXISTS dim_circuit (
   location VARCHAR(200),
   country VARCHAR(100),
   altitude INT,
-  lat DECIMAL(9,6),
-  lng DECIMAL(9,6),
+  latitude DECIMAL(9,6),
+  longitude DECIMAL(9,6),
+  url VARCHAR(255),
   UNIQUE KEY uq_circuit_nk (circuit_nk),
   UNIQUE KEY uq_circuit_ref (circuit_ref)
-);
+) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS dim_date (
   date_id INT AUTO_INCREMENT PRIMARY KEY,
-  date DATE NOT NULL,
+  date DATE NOT NULL,                 
   year SMALLINT,
   month TINYINT,
   day TINYINT,
+
   UNIQUE KEY uq_date (date)
 ) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS dim_race (
   race_id INT AUTO_INCREMENT PRIMARY KEY,
-  race_nk INT NOT NULL,         -- races.raceId in csv
+  race_nk INT NOT NULL,               -- races.raceId in csv
   name VARCHAR(200),
-  round INT,
+  round INT,                 
+  year SMALLINT,
+  url VARCHAR(255),
   UNIQUE KEY uq_race_nk (race_nk)
 ) engine=InnoDB;
 
