@@ -31,7 +31,6 @@ datasources:
       lat: latitude
       lng: longitude
       url: urlCircuits
-
   constructors:
     name: "../DATASETS/constructors.csv"
     mergeLogic:
@@ -135,7 +134,8 @@ tables:
     q2_sec: { value: q2, duration_sec: true }
     q3_sec: { value: q3, duration_sec: true }
 
-    position: position
+    position: 
+      value: position
 
 config:
   dim_driver:

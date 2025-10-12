@@ -1,20 +1,20 @@
 CREATE TABLE IF NOT EXISTS dim_driver (
   driver_id INT AUTO_INCREMENT PRIMARY KEY,
   driver_nk INT NOT NULL,                       -- drivers.driverId
-  driverRef VARCHAR(64) NOT NULL,
+  driver_ref VARCHAR(64) NOT NULL,
   code VARCHAR(16),
   forename VARCHAR(100),
   surname VARCHAR(100),
   nationality VARCHAR(100),
   number INT,
   UNIQUE KEY uq_driver_nk (driver_nk),
-  UNIQUE KEY uq_driverRef (driverRef)
+  UNIQUE KEY uq_driverRef (driver_ref)
 ) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS dim_circuit (
   circuit_id INT AUTO_INCREMENT PRIMARY KEY,
   circuit_nk INT NOT NULL,          -- circuits.circuit_id
-  circuitRef VARCHAR(64) NOT NULL,
+  circuit_ref VARCHAR(64) NOT NULL,
   name VARCHAR(200),
   location VARCHAR(200),
   country VARCHAR(100),
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS dim_circuit (
   lat DECIMAL(9,6),
   lng DECIMAL(9,6),
   UNIQUE KEY uq_circuit_nk (circuit_nk),
-  UNIQUE KEY uq_circuitRef (circuitRef)
+  UNIQUE KEY uq_circuitRef (circuit_ref)
 ) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS dim_date (
@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS dim_date (
   year SMALLINT,
   month TINYINT,
   day TINYINT,
-  day_of_week TINYINT,
   UNIQUE KEY uq_date (date)
 ) engine=InnoDB;
 
@@ -40,10 +39,11 @@ CREATE TABLE IF NOT EXISTS dim_race (
   race_nk INT NOT NULL,         -- races.raceId
   name VARCHAR(200),
   round INT,
+  year SMALLINT,
   UNIQUE KEY uq_race_nk (race_nk)
 ) engine=InnoDB;
 
-CREATE TABLE IF NOT EXISTS fact_pit_stop (
+CREATE TABLE IF NOT EXISTS fact_pit_stops (
   pit_stop_id BIGINT AUTO_INCREMENT PRIMARY KEY,
   race_id INT,
   driver_id INT,
