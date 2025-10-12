@@ -1,10 +1,13 @@
 import sqlalchemy as alc
 import pandas as pd
+from sqlalchemy.dialects.mysql import insert as mysql_insert
 from config import cfg
+
 
 def get_connection():
     url = cfg.get_dbConnection()
     return alc.create_engine(url)
+
 
 def createDB():
     if checkDBSctructure():
@@ -13,7 +16,9 @@ def createDB():
     else:
         try:
             engine = get_connection()
-            print(f"[INFO] Connection to {cfg.db_host}/{cfg.db_name} for user {cfg.db_user} established successfully.")       
+            print(
+                f"[INFO] Connection to {cfg.db_host}/{cfg.db_name} for user {cfg.db_user} established successfully."
+            )
             with engine.begin() as conn:
                 dataSQL = open(cfg.db_script).read()
                 statements = dataSQL.split(";")
@@ -22,9 +27,10 @@ def createDB():
                     if stmt:
                         conn.execute(alc.text(stmt))
             engine.dispose()
-            print(f"[INFO] Database {cfg.db_name} created succesfully")     
+            print(f"[INFO] Database {cfg.db_name} created successfully")
         except Exception as ex:
-            print("[ERROR] An error ocurred: \n", ex)
+            print("[ERROR] An error occurred: \n", ex)
+
 
 def extractTable(table):
     try:
@@ -36,7 +42,8 @@ def extractTable(table):
         engine.dispose()
         return rows
     except Exception as ex:
-        print(f"[ERROR] An error ocurred extracting table {table}: \n", ex)
+        print(f"[ERROR] An error occurred extracting table {table}: \n", ex)
+
 
 def extractValues(table_name, target_cols, conditions):
     try:
@@ -58,7 +65,11 @@ def extractValues(table_name, target_cols, conditions):
                 return dict(zip(target_cols, result))
         return None
     except Exception as ex:
-        print(f"[ERROR] An error ocurred extracting data from table {table_name} with conditions {conditions}: \n", ex) 
+        print(
+            f"[ERROR] An error occurred extracting data from table {table_name} with conditions {conditions}: \n",
+            ex,
+        )
+
 
 def insertData(data, batch_size=200000):
     try:
@@ -66,26 +77,113 @@ def insertData(data, batch_size=200000):
         metadata = alc.MetaData()
         with engine.begin() as conn:
             inspector = alc.inspect(conn)
-            for table_name in inspector.get_table_names():
-                if table_name in data:
-                    print(f"[INFO] Inserting values into table '{table_name}' ({len(data[table_name])} records)")
-                    table = alc.Table(table_name, metadata, autoload_with=conn)
-                    values = data[table_name]
-                    if isinstance(values, dict):
-                        values = [values]
+            db_tables = set(inspector.get_table_names())
 
-                    total = len(values)
+            for table_name, values in data.items():
+                if table_name not in db_tables:
+                    print(
+                        f"[INFO] Table '{table_name}' does not exist in the database."
+                    )
+                    continue
+
+                if not values:
+                    print(
+                        f"[INFO] No data to insert for table '{table_name}'. Skipping."
+                    )
+                    continue
+
+                print(
+                    f"[INFO] Trying to insert values into table '{table_name}' ({len(values)} records)"
+                )
+
+                on_dup_method = cfg.onDuplicateRule.get(table_name, "ignore")
+                on_dup_criteria = cfg.onDuplicateBase.get(table_name, [])
+                id_col = cfg.idMapping.get(table_name)
+
+                table = alc.Table(table_name, metadata, autoload_with=conn)
+                rows = values if isinstance(values, list) else [values]
+
+                if on_dup_method == "ignore":
+                    insert_statement = mysql_insert(table).prefix_with("IGNORE")
+                    total = len(rows)
+                    inserted = 0
+
                     for i in range(0, total, batch_size):
-                        batch = values[i:i + batch_size]
+                        batch = rows[i : i + batch_size]
                         if batch:
                             try:
-                                conn.execute(table.insert(), batch)
-                                print(f"[INFO] Inserted batch {i}-{i + len(batch) - 1} of {total} records")
-                            except Exception as ex:
-                                print(f"[ERROR] Failed to insert batch {i}-{i + len(batch) - 1}")
-                                print(f"[ERROR] Batch sample: {batch[:3]} ...")
-                                raise RuntimeError(f"Insert failed for table '{table_name}' on batch {i}-{i + len(batch) - 1}: {ex}") from ex
+                                result = conn.execute(insert_statement, batch)
+                                inserted += result.rowcount or 0
+                                skipped = len(batch) - (result.rowcount or 0)
+                                print(
+                                    f"[INFO] Batch {i}-{i+len(batch)-1}: inserted={inserted}, skipped_duplicates={skipped}"
+                                )
 
+                            except Exception as ex:
+                                print(
+                                    f"[ERROR] Failed to insert batch {i}-{i + len(batch) - 1}"
+                                )
+                                print(f"[ERROR] Batch sample: {batch[:3]} ...")
+                                raise RuntimeError(
+                                    f"Insert failed for table '{table_name}' on batch {i}-{i + len(batch) - 1}: {ex}"
+                                ) from ex
+                elif on_dup_method == "update" and on_dup_criteria:
+                    # only non-key columns will be updated (key columns are defined in the schema) not with NULL!!
+                    non_key_cols = [
+                        col.name
+                        for col in table.columns
+                        if col.name not in on_dup_criteria and col.name != id_col
+                    ]
+                    insert_statement = mysql_insert(table)
+                    update_map = {
+                        c: alc.func.coalesce(insert_statement.inserted[c], table.c[c])
+                        for c in non_key_cols
+                    }
+
+                    upsert_statement = insert_statement.on_duplicate_key_update(
+                        **update_map
+                    )
+                    total = len(rows)
+
+                    total_affected = 0
+
+                    for i in range(0, total, batch_size):
+                        batch = rows[i : i + batch_size]
+                        if batch:
+                            res = conn.execute(upsert_statement, batch)
+                            rc = res.rowcount or 0
+                            total_affected += rc
+                            # MySQL returns rowcount as the total number of affected rows (inserted + updated)
+                            # We cannot distinguish inserted vs updated in batch mode, so we report total affected
+                            print(
+                                f"[INFO] Batch {i}-{i+len(batch)-1}: affected={rc}"
+                            )
+
+                    print(
+                        f"[INFO] '{table_name}': total affected rows={total_affected}"
+                    )
+
+                else:
+                    total = len(rows)
+                    inserted = 0
+
+                    for i in range(0, total, batch_size):
+                        batch = rows[i : i + batch_size]
+                        if batch:
+                            try:
+                                result = conn.execute(table.insert(), batch)
+                                inserted += result.rowcount or 0
+                                print(
+                                    f"[INFO] Batch {i}-{i+len(batch)-1}: inserted={inserted}"
+                                )
+                            except Exception as ex:
+                                print(
+                                    f"[ERROR] Failed to insert batch {i}-{i + len(batch) - 1}"
+                                )
+                                print(f"[ERROR] Batch sample: {batch[:3]} ...")
+                                raise RuntimeError(
+                                    f"Insert failed for table '{table_name}' on batch {i}-{i + len(batch) - 1}: {ex}"
+                                ) from ex
         engine.dispose()
         print("[INFO] All data inserted successfully")
 
@@ -93,11 +191,13 @@ def insertData(data, batch_size=200000):
         print("[ERROR] Error during insert:", ex)
         raise
 
+
 def checkDB(engine):
     inspector = alc.inspect(engine)
     print("[INFO] Current DB:", engine.url.database)
     for table_name in inspector.get_table_names():
         print("[INFO] Table:", table_name)
+
 
 def checkDBSctructure():
     try:
@@ -117,4 +217,5 @@ def checkDBSctructure():
     except Exception as ex:
         url = cfg.get_dbConnection()
         print(f"[ERROR] An error ocurred checking {url}: \n", ex)
-
+        url = cfg.get_dbConnection()
+        print(f"[ERROR] An error occurred checking {url}: \n", ex)
