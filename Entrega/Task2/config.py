@@ -2,6 +2,7 @@ import yaml
 from pathlib import Path
 import sys
 
+
 class Config:
     def __init__(self, yaml_path: str):
         self.yaml_path = Path(yaml_path)
@@ -16,10 +17,10 @@ class Config:
             table_map = {}
             for col_name, rules in cols.items():
                 if isinstance(rules, dict):
-                    if list(rules.keys()) == ['value']:
-                        table_map[col_name] = rules['value']
-                    elif list(rules.keys()) == ['mapped']:
-                        table_map[col_name] = rules['mapped']
+                    if list(rules.keys()) == ["value"]:
+                        table_map[col_name] = rules["value"]
+                    elif list(rules.keys()) == ["mapped"]:
+                        table_map[col_name] = rules["mapped"]
                     else:
                         table_map[col_name] = rules
                 else:
@@ -30,13 +31,13 @@ class Config:
     def load_config(self, config):
         onDupRuleAux = {}
         onDupBaseAux = {}
-        onNullAux = {} 
+        onNullAux = {}
         designAux = {}
         idAux = {}
 
         for table, configWrap in config.items():
             for configAux, param in configWrap.items():
-                if(configAux == "onDuplicate"):
+                if configAux == "onDuplicate":
                     if isinstance(param, dict):
                         criteria = param.get("criteria")
                         onDupBaseAux[table] = criteria
@@ -47,17 +48,36 @@ class Config:
                             onDupRuleAux[table] = method
                     else:
                         onDupRuleAux[table] = param
-                elif(configAux == "onNull"):
-                    if len(param) > 1:
-                        onNullAux[table] = {param["method"]: param["criteria"]}
+                elif configAux == "onNull":
+                    # Support multiple null-handling strategies:
+                    #  - legacy: { method: default|substitution, criteria: {...} }
+                    #  - simple: { method: ignore }
+                    #  - refactor: { require: [field1, field2, ...] }
+                    if isinstance(param, dict):
+                        if "method" in param:
+                            method = param.get("method")
+                            criteria = param.get("criteria")
+                            if criteria is not None:
+                                onNullAux[table] = {method: criteria}
+                            else:
+                                onNullAux[table] = method
+                        elif "require" in param:
+                            req = param.get("require")
+                            onNullAux[table] = {"require": req}
+                        else:
+                            raise ValueError(
+                                f"Unrecognized onNull configuration for table {table}: {param}"
+                            )
                     else:
-                        onNullAux[table] = param["method"]
-                elif (configAux == "design"):
+                        onNullAux[table] = param
+                elif configAux == "design":
                     designAux[table] = param
-                elif (configAux == "id"):
+                elif configAux == "id":
                     idAux[table] = param
                 else:
-                    raise ValueError(f"Unrecognized config for table {table} found in config file: {param}")
+                    raise ValueError(
+                        f"Unrecognized config for table {table} found in config file: {param}"
+                    )
         return onDupBaseAux, onDupRuleAux, onNullAux, designAux, idAux
 
     def db_Skeleton(self):
@@ -65,7 +85,7 @@ class Config:
         for table, columns in self.tables.items():
             attributes = list(columns.keys())
             result[table] = attributes
-            
+
         for table, id_col in self.idMapping.items():
             if table not in result:
                 result[table] = []
@@ -89,10 +109,17 @@ class Config:
         self.db_name = db_cfg.get("name", "")
         self.tables = cfg.get("tables", {})
         self.tables = self.load_mapping()
-        self.onDuplicateBase, self.onDuplicateRule, self.onNull, self.design, self.idMapping = self.load_config(cfg.get("config", {}))
+        (
+            self.onDuplicateBase,
+            self.onDuplicateRule,
+            self.onNull,
+            self.design,
+            self.idMapping,
+        ) = self.load_config(cfg.get("config", {}))
 
     def get_dbConnection(self):
         return f"mysql+pymysql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+
 
 if len(sys.argv) < 2:
     raise Exception("The path of the config file must be providen")
