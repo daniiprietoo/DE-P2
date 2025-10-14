@@ -181,6 +181,7 @@ tables:
       value: laps
       int: true
 
+<<<<<<< HEAD
     time_str:
       value: time
     time_ms:
@@ -192,6 +193,11 @@ tables:
       int: true
     fastest_lap_time_str:
       value: fastestLapTime
+=======
+    fastest_lap:
+      value: fastestLap
+
+>>>>>>> d2b824c69baec1922ce34b8b1f036f702ae02dad
     fastest_lap_time_ms: { value: fastestLapTime, duration_sec: true }
     fastest_lap_top_speed:
       value: fastestLapSpeed
@@ -262,3 +268,4 @@ config:
     onNull:
       require:
         [race_id, driver_id, constructor_id, circuit_id, date_id, status_id]
+

@@ -152,13 +152,6 @@ tables:
     circuit_id: { fk: dim_circuit }
     date_id: { fk: dim_date }
 
-    q1_str:
-      value: q1
-    q2_str:
-      value: q2
-    q3_str:
-      value: q3
-
     q1_sec: { value: q1, duration_sec: true }
     q2_sec: { value: q2, duration_sec: true }
     q3_sec: { value: q3, duration_sec: true }
@@ -221,3 +214,5 @@ config:
 
     onNull:
       require: [race_id, driver_id, constructor_id, circuit_id, date_id]
+      criteria:
+

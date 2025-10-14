@@ -133,10 +133,6 @@ tables:
     lap: 
       value:  lap
       int: true
-    time_str: 
-      value: time
-    duration_str: 
-      value: duration
     duration_ms: 
       value: milliseconds
       int: true
@@ -192,3 +188,5 @@ config:
     # Require foreign keys and essential fields, which if null then there is no point in keeping the record
     onNull:
       require: [race_id, driver_id, circuit_id, date_id, stop, lap, duration_ms]
+
+        
