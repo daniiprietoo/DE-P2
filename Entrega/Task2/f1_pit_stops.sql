@@ -52,9 +52,6 @@ CREATE TABLE IF NOT EXISTS fact_pit_stops (
 
   stop INT,
   lap INT,
-
-  time_str VARCHAR(20),
-  duration_str VARCHAR(20),
   duration_ms INT,
 
   UNIQUE KEY uq_fact_pit (race_id, driver_id, stop, lap),
