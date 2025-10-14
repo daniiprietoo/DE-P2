@@ -213,6 +213,5 @@ config:
       method: update
 
     onNull:
-      require: [race_id, driver_id, constructor_id, circuit_id, date_id]
-      criteria:
+      require: [race_id, driver_id, constructor_id, circuit_id, date_id, q1_sec, position]
 

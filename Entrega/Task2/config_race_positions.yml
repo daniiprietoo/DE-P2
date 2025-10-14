@@ -168,10 +168,10 @@ tables:
     initial_position:
       value: grid
       int: true
-    final_position:
+    final_position: # If null, it means the driver did not finish
       value: position
       int: true
-    ranking_position:
+    ranking_position: # Never null, if final null, ranking_position is the position when retiring
       value: positionOrder
       int: true
     points:
@@ -181,9 +181,6 @@ tables:
       value: laps
       int: true
 
-<<<<<<< HEAD
-    time_str:
-      value: time
     time_ms:
       value: milliseconds
       int: true
@@ -191,13 +188,11 @@ tables:
     fastest_lap:
       value: fastestLap
       int: true
-    fastest_lap_time_str:
-      value: fastestLapTime
-=======
+
     fastest_lap:
       value: fastestLap
+      int: true
 
->>>>>>> d2b824c69baec1922ce34b8b1f036f702ae02dad
     fastest_lap_time_ms: { value: fastestLapTime, duration_sec: true }
     fastest_lap_top_speed:
       value: fastestLapSpeed
@@ -267,5 +262,6 @@ config:
 
     onNull:
       require:
-        [race_id, driver_id, constructor_id, circuit_id, date_id, status_id]
+        [race_id, driver_id, constructor_id, circuit_id, date_id, status_id, initial_position, laps, points, ranking_position]
+      
 
