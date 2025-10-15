@@ -80,11 +80,9 @@ CREATE TABLE IF NOT EXISTS fact_race_result (
   points DECIMAL(8,3),
   laps INT,
 
-  time_str VARCHAR(20),
   time_ms INT,
 
   fastest_lap INT,
-  fastest_lap_time_str VARCHAR(20),
   fastest_lap_time_ms INT,
   fastest_lap_top_speed DECIMAL(8,3),
 

@@ -67,10 +67,6 @@ CREATE TABLE IF NOT EXISTS fact_qualifying (
   circuit_id INT NOT NULL,
   date_id INT,
 
-  q1_str VARCHAR(20),
-  q2_str VARCHAR(20),
-  q3_str VARCHAR(20),
-
   q1_sec DECIMAL(10,3),
   q2_sec DECIMAL(10,3),
   q3_sec DECIMAL(10,3),
