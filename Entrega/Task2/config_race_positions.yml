@@ -142,14 +142,9 @@ tables:
     laps:
       value: laps
 
-    time_str:
-      value: time
-    time_ms: { value: milliseconds, duration: true }
-
     fastest_lap:
       value: fastestLap
-    fastest_lap_time_str:
-      value: fastestLapTime
+
     fastest_lap_time_ms: { value: fastestLapTime, duration_sec: true }
     fastest_lap_top_speed:
       value: fastestLapSpeed
@@ -264,7 +259,6 @@ config:
         ranking_position: null
         points: 0
         laps: 0
-        time_str: "00:00:00"
         time_ms: 0
         fastest_lap: null
         fastest_lap_time_ms: 0

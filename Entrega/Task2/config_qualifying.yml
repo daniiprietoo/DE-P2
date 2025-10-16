@@ -125,13 +125,6 @@ tables:
     circuit_id: { fk: dim_circuit }
     date_id: { fk: dim_date }
 
-    q1_str:
-      value: q1
-    q2_str:
-      value: q2
-    q3_str:
-      value: q3
-
     q1_sec: { value: q1, duration_sec: true }
     q2_sec: { value: q2, duration_sec: true }
     q3_sec: { value: q3, duration_sec: true }
@@ -231,7 +224,4 @@ config:
         q1_sec: null
         q2_sec: null
         q3_sec: null
-        q1_str: null
-        q2_str: null
-        q3_str: null
         position: null

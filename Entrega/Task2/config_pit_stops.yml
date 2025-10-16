@@ -107,10 +107,6 @@ tables:
       value: stop
     lap: 
       value:  lap
-    time_str: 
-      value:  time
-    duration_str: 
-      value:  duration
     duration_ms: 
       value:  milliseconds
 
@@ -190,7 +186,5 @@ config:
         date_id: null
         stop: -1
         lap: -1
-        time_str: null
-        duration_str: null
         duration_ms: -1
         
