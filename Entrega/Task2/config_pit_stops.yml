@@ -118,9 +118,12 @@ config:
   dim_driver:
     design: dimension
     id: driver_id
-    onDuplicate:
+    onDuplicateDS:
       criteria: driver_nk
       method: ignore
+    onDuplicateDB:
+      criteria: driver_nk
+      method: ignore 
     onNull:
       method: default
       criteria:
@@ -129,7 +132,10 @@ config:
   dim_circuit:
     design: dimension
     id: circuit_id
-    onDuplicate:
+    onDuplicateDS:
+      criteria: circuit_nk
+      method: ignore
+    onDuplicateDB:
       criteria: circuit_nk
       method: ignore
     onNull:
@@ -140,7 +146,10 @@ config:
   dim_date:
     design: dimension
     id: date_id
-    onDuplicate:
+    onDuplicateDS:
+      criteria: [year, month, day]
+      method: ignore
+    onDuplicateDB:
       criteria: [year, month, day]
       method: ignore
     onNull:
@@ -151,7 +160,10 @@ config:
   dim_race:
     design: dimension
     id: race_id
-    onDuplicate:
+    onDuplicateDS:
+      criteria: race_nk
+      method: ignore
+    onDuplicateDB:
       criteria: race_nk
       method: ignore
     onNull:
@@ -162,10 +174,12 @@ config:
   fact_pit_stops:
     design: fact
     id: pit_stop_id
-    onDuplicate:
+    onDuplicateDS:
       criteria: [race_id, driver_id, stop, lap]
-      method: update
-    
+      method: ignore
+    onDuplicateDB:
+      criteria: [race_id, driver_id, stop, lap]
+      method: update    
     onNull:
       method: default
       criteria:
