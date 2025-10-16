@@ -154,7 +154,6 @@ def extractFKDimensions():
 
     return dimension
 
-
 def dataStructure(procedure):
     result = {}
     for table, _ in cfg.tables.items():

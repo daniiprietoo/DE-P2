@@ -65,6 +65,8 @@ tables:
       value: nationalityDrivers
     number:
       value: number
+    url:
+      value: urlDrivers
 
   dim_constructor:
     constructor_nk:
@@ -134,7 +136,10 @@ config:
   dim_driver:
     design: dimension
     id: driver_id
-    onDuplicate:
+    onDuplicateDS:
+      criteria: driver_nk
+      method: ignore
+    onDuplicateDB:
       criteria: driver_nk
       method: ignore
     onNull:
@@ -145,7 +150,10 @@ config:
   dim_constructor:
     design: dimension
     id: constructor_id
-    onDuplicate:
+    onDuplicateDS:
+      criteria: constructor_nk
+      method: ignore
+    onDuplicateDB:
       criteria: constructor_nk
       method: ignore
     onNull:
@@ -156,7 +164,10 @@ config:
   dim_circuit:
     design: dimension
     id: circuit_id
-    onDuplicate:
+    onDuplicateDS:
+      criteria: circuit_nk
+      method: ignore
+    onDuplicateDB:
       criteria: circuit_nk
       method: ignore
     onNull:
@@ -167,7 +178,10 @@ config:
   dim_date:
     design: dimension
     id: date_id
-    onDuplicate:
+    onDuplicateDS:
+      criteria: [year, month, day]
+      method: ignore
+    onDuplicateDB:
       criteria: [year, month, day]
       method: ignore
     onNull:
@@ -178,7 +192,10 @@ config:
   dim_race:
     design: dimension
     id: race_id
-    onDuplicate:
+    onDuplicateDS:
+      criteria: race_nk
+      method: ignore
+    onDuplicateDB:
       criteria: race_nk
       method: ignore
     onNull:
@@ -189,7 +206,10 @@ config:
   fact_qualifying:
     design: fact
     id: qualifying_id
-    onDuplicate:
+    onDuplicateDS:
+      criteria: [race_id, driver_id]
+      method: ignore
+    onDuplicateDB:
       criteria: [race_id, driver_id]
       method: update
 

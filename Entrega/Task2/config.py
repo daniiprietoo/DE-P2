@@ -30,13 +30,15 @@ class Config:
     def load_config(self, config):
         onDupRuleAux = {}
         onDupBaseAux = {}
+        onDupDBRuleAux = {}
+        onDupDBBaseAux = {}
         onNullAux = {} 
         designAux = {}
         idAux = {}
 
         for table, configWrap in config.items():
             for configAux, param in configWrap.items():
-                if(configAux == "onDuplicate"):
+                if(configAux == "onDuplicateDS"):
                     if isinstance(param, dict):
                         criteria = param.get("criteria")
                         onDupBaseAux[table] = criteria
@@ -47,6 +49,17 @@ class Config:
                             onDupRuleAux[table] = method
                     else:
                         onDupRuleAux[table] = param
+                elif(configAux == "onDuplicateDB"):
+                    if isinstance(param, dict):
+                        criteria = param.get("criteria")
+                        onDupDBBaseAux[table] = criteria
+                        method = param.get("method")
+                        if method == "add" and "field" in param:
+                            onDupDBRuleAux[table] = {"add": param["field"]}
+                        else:
+                            onDupDBRuleAux[table] = method
+                    else:
+                        onDupDBRuleAux[table] = param
                 elif(configAux == "onNull"):
                     if len(param) > 1:
                         onNullAux[table] = {param["method"]: param["criteria"]}
@@ -58,7 +71,7 @@ class Config:
                     idAux[table] = param
                 else:
                     raise ValueError(f"Unrecognized config for table {table} found in config file: {param}")
-        return onDupBaseAux, onDupRuleAux, onNullAux, designAux, idAux
+        return onDupBaseAux, onDupRuleAux, onDupDBBaseAux, onDupDBRuleAux, onNullAux, designAux, idAux
 
     def db_Skeleton(self):
         result = {}
@@ -89,7 +102,7 @@ class Config:
         self.db_name = db_cfg.get("name", "")
         self.tables = cfg.get("tables", {})
         self.tables = self.load_mapping()
-        self.onDuplicateBase, self.onDuplicateRule, self.onNull, self.design, self.idMapping = self.load_config(cfg.get("config", {}))
+        self.onDuplicateBase, self.onDuplicateRule, self.onDuplicateDBbase, self.onDuplicateDBrule, self.onNull, self.design, self.idMapping = self.load_config(cfg.get("config", {}))
 
     def get_dbConnection(self):
         return f"mysql+pymysql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"

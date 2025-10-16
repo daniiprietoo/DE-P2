@@ -96,8 +96,8 @@ def insertData(data, batch_size=200000):
                     f"[INFO] Trying to insert values into table '{table_name}' ({len(values)} records)"
                 )
 
-                on_dup_method = cfg.onDuplicateRule.get(table_name, "ignore")
-                on_dup_criteria = cfg.onDuplicateBase.get(table_name, [])
+                on_dup_method = cfg.onDuplicateDBrule.get(table_name, "ignore")
+                on_dup_criteria = cfg.onDuplicateDBbase.get(table_name, [])
                 id_col = cfg.idMapping.get(table_name)
 
                 table = alc.Table(table_name, metadata, autoload_with=conn)

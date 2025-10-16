@@ -85,7 +85,7 @@ def onDuplicate(records, table):
                 seen[key][target_field] += float(record.get(target_field, 0) or 0)
         unique_records = list(seen.values())
         
-    elif dup_rule in ("ignore", "update", None):
+    elif dup_rule in ("ignore", None):
         seen_keys = set()
         for record in records:
             key = tuple(record.get(f) for f in dedupe_keys)
